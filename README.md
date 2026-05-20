@@ -153,6 +153,14 @@ Rough skill: given a ticket number, scaffold migration + test stubs in one shot.
 
 ---
 
+## Roadmap
+
+- [ ] Two-layer system — shared `docs-claude/` folder in repo read alongside personal context
+- [ ] `/wrap-up` promotion flow — offer to stage personal discoveries for team review
+- [ ] Weekly distill command — Claude reads recent merged PRs + personal context files,
+      proposes a `docs-claude/` update PR against the testing branch
+- [ ] Team install guide — onboard a whole repo with one command
+
 ## To update
 
 Re-run the install command — `SKILL.md` and all templates are overwritten, the
