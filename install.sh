@@ -69,7 +69,30 @@ Templates for all files are in ~/.claude/skills/dev-context/templates/.
 
 ---
 
-## Session End — triggered by "wrap up", "/wrap-up", or "update context"
+## Session End
+
+See ~/.claude/skills/dev-context/wrap-up.md for full wrap-up instructions.
+Triggered by: "wrap up", "/wrap-up", or "update context".
+
+---
+
+## General behaviour rules
+
+- Never mention reading context files out loud — do it silently, summarize in one line
+- Never overwrite CLAUDE.md wholesale — only append to it
+- Never invent entries — only log things that actually came up in the session
+- Keep CURRENT.md entries honest and specific — vague entries are useless to future-you
+- If unsure which decisions/ file to write to, ask the user before creating a new one
+SKILLEOF
+
+cat > "${SKILL_DIR}/wrap-up.md" << 'WRAPEOF'
+# Wrap-Up Skill
+
+Triggered by: "wrap up", "/wrap-up", or "update context"
+
+Detect PROJECT_NAME from the current repo folder name before starting.
+
+---
 
 **Step 1 — Rewrite CURRENT.md**
 
@@ -134,17 +157,11 @@ Review occasionally and promote to ~/.claude/skills/ when a pattern repeats enou
 **Step 5 — Confirm**
 
 Print: "Context updated. See you next session. 👋"
+WRAPEOF
 
----
-
-## General behaviour rules
-
-- Never mention reading context files out loud — do it silently, summarize in one line
-- Never overwrite CLAUDE.md wholesale — only append to it
-- Never invent entries — only log things that actually came up in the session
-- Keep CURRENT.md entries honest and specific — vague entries are useless to future-you
-- If unsure which decisions/ file to write to, ask the user before creating a new one
-SKILLEOF
+# Symlink wrap-up skill → dev-context/wrap-up.md (single source of truth)
+mkdir -p "${HOME}/.claude/skills/wrap-up"
+ln -sf "${SKILL_DIR}/wrap-up.md" "${HOME}/.claude/skills/wrap-up/SKILL.md"
 
 # Append dev-context block to ~/.claude/CLAUDE.md (idempotent)
 if grep -q "dev-context/SKILL.md" "${CLAUDE_MD}" 2>/dev/null; then
@@ -169,6 +186,8 @@ fi
 echo ""
 echo "Done. Files written:"
 echo "  ${SKILL_DIR}/SKILL.md"
+echo "  ${SKILL_DIR}/wrap-up.md"
+echo "  ${HOME}/.claude/skills/wrap-up/SKILL.md → (symlink)"
 echo "  ${TEMPLATES_DIR}/CLAUDE.md.template"
 echo "  ${TEMPLATES_DIR}/CURRENT.md.template"
 echo "  ${TEMPLATES_DIR}/CLAUDE.local.md.template"
