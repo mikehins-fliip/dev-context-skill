@@ -1,0 +1,28 @@
+# Codebase Context for Claude — [PROJECT_NAME]
+
+> Focus on things Claude can't infer from reading the code:
+> history, intent, gotchas, and business rules.
+> Update as you learn things — even one bullet at a time.
+
+---
+
+## Domain Rules That Aren't Obvious
+<!-- Things that look wrong but are intentional -->
+
+## Dangerous Areas
+<!-- Files or patterns that have burned you or could burn someone else -->
+
+## How Key Things Connect
+<!-- High-level flow of the most complex parts of the system -->
+
+## Test Fixtures Worth Knowing
+<!-- Special test cases that catch real-world edge cases -->
+
+## What I've Learned the Hard Way
+<!-- Hard-won lessons. Things you wish someone told you on day 1 -->
+
+## Tribal Knowledge & Open Questions
+<!-- Things you've heard but not verified, or questions still open -->
+
+## Jira / PR References Worth Keeping
+<!-- Links to decisions made in tickets, not in code -->

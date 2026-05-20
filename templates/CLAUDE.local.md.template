@@ -1,0 +1,9 @@
+# Local Context
+
+See additional context files in ~/dev-context/[PROJECT_NAME]/:
+
+- ~/dev-context/[PROJECT_NAME]/CLAUDE.md — domain rules, gotchas, how things connect
+- ~/dev-context/[PROJECT_NAME]/CURRENT.md — current work, open questions, next step
+- ~/dev-context/[PROJECT_NAME]/decisions/ — decision logs per domain area
+
+Please read CLAUDE.md and CURRENT.md at the start of every session before touching any code.
