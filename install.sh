@@ -147,7 +147,7 @@ Print: "Context updated. See you next session. 👋"
 SKILLEOF
 
 # Append dev-context block to ~/.claude/CLAUDE.md (idempotent)
-if grep -q "dev-context-skill" "${CLAUDE_MD}" 2>/dev/null; then
+if grep -q "dev-context/SKILL.md" "${CLAUDE_MD}" 2>/dev/null; then
   echo "~/.claude/CLAUDE.md already contains dev-context block — skipping"
 else
   if [[ -f "${CLAUDE_MD}" ]]; then
