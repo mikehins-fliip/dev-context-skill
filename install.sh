@@ -81,8 +81,9 @@ Templates for all files are in ~/.claude/skills/dev-context/templates/.
      "I've created your dev-context folder at ~/dev-context/[PROJECT_NAME]/. Starting fresh!"
 
    IF IT EXISTS:
+   - If CONTEXT.md does not exist but CLAUDE.md does, rename it:
+     mv ~/dev-context/[PROJECT_NAME]/CLAUDE.md ~/dev-context/[PROJECT_NAME]/CONTEXT.md
    - Silently read ~/dev-context/[PROJECT_NAME]/CONTEXT.md
-     (falls back to CLAUDE.md if CONTEXT.md does not exist — legacy naming)
    - Silently read ~/dev-context/[PROJECT_NAME]/CURRENT.md
    - Greet the user with one line:
      "Picking up from [last updated date]: [one sentence summary of current work and next step]."
