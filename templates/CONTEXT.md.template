@@ -1,4 +1,4 @@
-# Codebase Context for Claude — [PROJECT_NAME]
+# Codebase Context — [PROJECT_NAME]
 
 > Focus on things Claude can't infer from reading the code:
 > history, intent, gotchas, and business rules.

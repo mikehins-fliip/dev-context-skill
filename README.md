@@ -1,23 +1,35 @@
 # dev-context-skill
 
-A Claude Code skill that reduces cognitive debt on any codebase.
+A personal knowledge system for any AI coding assistant — Claude Code, Gemini, or both.
 
-Maintains a personal knowledge system at `~/dev-context/[project]/` — outside your repo,
-invisible to git, always available to Claude Code.
+Maintains context at `~/dev-context/[project]/` — outside your repo,
+invisible to git, always available to your AI assistant.
 
 ## What it does
 
-**Session start:** Claude silently reads your context files and picks up where you left off.
+**Session start:** AI silently reads your context files and picks up where you left off.
 
-**`/wrap-up`:** Claude updates your notes, logs domain discoveries, flags decision log entries,
-and spots workflow patterns worth turning into skills.
+**`/wrap-up`:** Updates your notes, logs domain discoveries, flags decision log entries,
+and spots workflow patterns worth automating.
 
 ## Install
 
-**One-liner (recommended):**
+**Claude Code (default):**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mikehins-fliip/dev-context-skill/main/install.sh | bash
+```
+
+**Gemini:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mikehins-fliip/dev-context-skill/main/install.sh | bash -s -- --ai gemini
+```
+
+**Both:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mikehins-fliip/dev-context-skill/main/install.sh | bash -s -- --ai all
 ```
 
 > Prefer to inspect first? `curl -fsSL https://raw.githubusercontent.com/mikehins-fliip/dev-context-skill/main/install.sh | less`
@@ -26,34 +38,39 @@ Or clone and run locally:
 
 ```bash
 git clone https://github.com/mikehins-fliip/dev-context-skill.git
-bash dev-context-skill/install.sh
+bash dev-context-skill/install.sh --ai all
 ```
 
 ## What gets installed
 
 ```
 ~/.claude/
-├── CLAUDE.md              ← 3 lines appended (idempotent, backed up first)
+├── CLAUDE.md              ← block appended (idempotent, backed up first)
 └── skills/
     └── dev-context/
         ├── SKILL.md
+        ├── wrap-up.md
         └── templates/
-            ├── CLAUDE.md.template
+            ├── CONTEXT.md.template
             ├── CURRENT.md.template
             ├── CLAUDE.local.md.template
+            ├── GEMINI.md.template
             └── decisions/
                 └── TEMPLATE.md
+
+~/.gemini/
+└── GEMINI.md              ← block appended (--ai gemini or --ai all only)
 ```
 
 Per-project knowledge lives in `~/dev-context/[project]/` and is created automatically
-on your first Claude Code session in any repo.
+on your first session in any repo. Both assistants read the same files.
 
 ## Knowledge files
 
-### `CLAUDE.md` — what Claude can't infer from the code
+### `CONTEXT.md` — what the AI can't infer from the code
 
 Things that look wrong but are intentional, dangerous areas, and hard-won lessons.
-Claude appends to this file during `/wrap-up` when something worth keeping surfaces.
+Appended to during `/wrap-up` when something worth keeping surfaces.
 
 ```markdown
 ## Domain Rules That Aren't Obvious
@@ -72,14 +89,14 @@ Claude appends to this file during `/wrap-up` when something worth keeping surfa
   and `organization_id` may be stale after a transfer.
 ```
 
-**How Claude uses it:** If you ask "can I refactor the billing flow?", Claude already knows
+**How the AI uses it:** If you ask "can I refactor the billing flow?", it already knows
 about the integer-only price rule and the refund retry risk — without you explaining it again.
 
 ---
 
 ### `CURRENT.md` — re-entry note for next session
 
-Written at `/wrap-up`. Tells Claude exactly where things stand so the next session
+Written at `/wrap-up`. Tells the AI exactly where things stand so the next session
 starts at full speed.
 
 ```markdown
@@ -105,7 +122,7 @@ Wire up the failure handler — on job failure, notify the user via email
   Bulk inserts will silently fail if two exports land within the same second.
 ```
 
-**How Claude uses it:** Session opens with: *"Picking up from 2026-05-20: async report
+**How the AI uses it:** Session opens with: *"Picking up from 2026-05-20: async report
 export (PROJ-412) — job dispatches, migration pending, next step is the failure handler."*
 
 ---
@@ -113,7 +130,7 @@ export (PROJ-412) — job dispatches, migration pending, next step is the failur
 ### `decisions/[area].md` — why things are the way they are
 
 One file per domain area. Append-only log of decisions, tradeoffs, and historical context.
-Claude prompts you to log entries during `/wrap-up` when a significant "why" surfaces.
+Prompted during `/wrap-up` when a significant "why" surfaces.
 
 ```markdown
 # Decision Log — Payments
@@ -133,14 +150,14 @@ dedup layer we don't have bandwidth to build right now.
 **Related:** PROJ-201, payment provider idempotency docs.
 ```
 
-**How Claude uses it:** When you revisit checkout months later, Claude knows the async
+**How the AI uses it:** When you revisit checkout months later, it knows the async
 path was already explored and why it was rejected — no re-investigation needed.
 
 ---
 
 ### `skill-candidates.md` — patterns worth automating
 
-Surfaces during `/wrap-up` when Claude spots something repetitive or manual.
+Surfaces during `/wrap-up` when the AI spots something repetitive or manual.
 
 ```markdown
 # Skill Candidates — myapp
@@ -153,23 +170,35 @@ Rough skill: given a ticket number, scaffold migration + test stubs in one shot.
 
 ---
 
+## AI compatibility
+
+| Feature | Claude Code | Gemini |
+|---|---|---|
+| Session start (auto-load context) | ✅ via skill | ✅ via GEMINI.md |
+| `/wrap-up` slash command | ✅ | ❌ — use phrase "wrap up" |
+| Shared `~/dev-context/` knowledge | ✅ | ✅ |
+| Repo-root config file | `CLAUDE.local.md` | `GEMINI.md` |
+
+---
+
 ## Roadmap
 
-- [ ] Two-layer system — shared `docs-claude/` folder in repo read alongside personal context
+- [ ] Two-layer system — shared `docs-context/` folder in repo read alongside personal context
 - [ ] `/wrap-up` promotion flow — offer to stage personal discoveries for team review
-- [ ] Weekly distill command — Claude reads recent merged PRs + personal context files,
-      proposes a `docs-claude/` update PR against the testing branch
+- [ ] Weekly distill command — AI reads recent merged PRs + personal context files,
+      proposes a shared update PR against the testing branch
 - [ ] Team install guide — onboard a whole repo with one command
 
 ## To update
 
-Re-run the install command — `SKILL.md` and all templates are overwritten, the
-`CLAUDE.md` block is skipped if already present (no duplicates).
+Re-run the install command — `SKILL.md`, `wrap-up.md`, and all templates are overwritten.
+Config file blocks are skipped if already present (no duplicates).
 
 ## Uninstall
 
 ```bash
-rm -rf ~/.claude/skills/dev-context/
+rm -rf ~/.claude/skills/dev-context/ ~/.claude/skills/wrap-up/
 ```
 
-Then remove the `## Dev-Context Skill` block from `~/.claude/CLAUDE.md`.
+Then remove the `## Dev-Context Skill` block from `~/.claude/CLAUDE.md`
+and the `## Dev-Context` block from `~/.gemini/GEMINI.md` if applicable.
