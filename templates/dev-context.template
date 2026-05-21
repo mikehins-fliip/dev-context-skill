@@ -1,0 +1,6 @@
+# Push personal session context to a shared private repo after each wrap-up.
+# Commit this file to share CONTEXT_REPO with teammates.
+# Each developer sets their own CONTEXT_USER locally (or keep file gitignored).
+
+CONTEXT_REPO=git@github.com:your-org/your-context-repo.git
+CONTEXT_USER=your-github-username

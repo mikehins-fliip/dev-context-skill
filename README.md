@@ -170,6 +170,33 @@ Rough skill: given a ticket number, scaffold migration + test stubs in one shot.
 
 ---
 
+## Shared team context
+
+By default, context is **local only** — nothing leaves your machine.
+To push your personal session notes to a shared private repo after each `/wrap-up`,
+add a `.dev-context` file at the root of the project:
+
+```ini
+# Push personal session context to a shared private repo after each wrap-up.
+# Commit this file to share CONTEXT_REPO with teammates.
+# Each developer sets their own CONTEXT_USER locally (or keep file gitignored).
+
+CONTEXT_REPO=git@github.com:your-org/your-context-repo.git
+CONTEXT_USER=your-github-username
+```
+
+A template is available at `~/.claude/skills/dev-context/templates/dev-context.template`.
+
+**What happens on wrap-up when the file is present:**
+- Personal context (`~/dev-context/[project]/`) is committed and pushed to `context/[CONTEXT_USER]` branch in the configured repo
+- First push initializes a git repo inside `~/dev-context/[project]/` automatically
+- If nothing changed since the last push, the step is skipped silently
+
+**Separation:** projects without a `.dev-context` file never push anywhere.
+Work repo has the file, personal projects don't — context stays isolated.
+
+---
+
 ## AI compatibility
 
 | Feature | Claude Code | Gemini |
@@ -222,8 +249,8 @@ Team:
 
 **What needs to be built**
 
-- [ ] `wrap-up.md` — add auto-push step: commit and push personal context to `context/[username]` after wrap-up
-- [ ] `install.sh` — set up the private context repo remote + create personal branch on first install
+- [x] `wrap-up.md` — auto-push step: commit and push personal context to `context/[username]` after wrap-up (opt-in via `.dev-context`)
+- [x] Per-project isolation — projects without `.dev-context` never push anywhere
 - [ ] `/distill` skill — reads all `context/*` branches, proposes `docs-context/` additions (manual review before PR)
 - [ ] GitHub Action — automates the distill step on a schedule (e.g. Monday 9am) or on `workflow_dispatch`
 - [ ] Two-layer session start — also read `docs-context/CONTEXT.md` from repo if present

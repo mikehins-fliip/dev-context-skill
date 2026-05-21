@@ -46,6 +46,7 @@ if [[ "${LOCAL_MODE}" == true ]]; then
   cp "${SCRIPT_DIR}/templates/CURRENT.md.template"       "${TEMPLATES_DIR}/CURRENT.md.template"
   cp "${SCRIPT_DIR}/templates/CLAUDE.local.md.template"  "${TEMPLATES_DIR}/CLAUDE.local.md.template"
   cp "${SCRIPT_DIR}/templates/GEMINI.md.template"        "${TEMPLATES_DIR}/GEMINI.md.template"
+  cp "${SCRIPT_DIR}/templates/dev-context.template"      "${TEMPLATES_DIR}/dev-context.template"
   cp "${SCRIPT_DIR}/templates/decisions/TEMPLATE.md"     "${TEMPLATES_DIR}/decisions/TEMPLATE.md"
 else
   echo "Fetching templates from GitHub..."
@@ -53,6 +54,7 @@ else
   curl -fsSL "${BASE_URL}/templates/CURRENT.md.template"       -o "${TEMPLATES_DIR}/CURRENT.md.template"
   curl -fsSL "${BASE_URL}/templates/CLAUDE.local.md.template"  -o "${TEMPLATES_DIR}/CLAUDE.local.md.template"
   curl -fsSL "${BASE_URL}/templates/GEMINI.md.template"        -o "${TEMPLATES_DIR}/GEMINI.md.template"
+  curl -fsSL "${BASE_URL}/templates/dev-context.template"      -o "${TEMPLATES_DIR}/dev-context.template"
   curl -fsSL "${BASE_URL}/templates/decisions/TEMPLATE.md"     -o "${TEMPLATES_DIR}/decisions/TEMPLATE.md"
 fi
 
@@ -182,7 +184,39 @@ Patterns spotted during wrap-up that might be worth turning into skills.
 Review occasionally and promote to ~/.claude/skills/ when a pattern repeats enough to justify it.
 ```
 
-**Step 5 — Confirm**
+**Step 5 — Push context to shared repo (if configured)**
+
+Check if `.dev-context` exists at the repo root.
+
+IF IT EXISTS:
+- Read CONTEXT_REPO and CONTEXT_USER from the file (source it as shell vars)
+- Run these commands exactly:
+
+```bash
+CONTEXT_DIR="$HOME/dev-context/[PROJECT_NAME]"
+BRANCH="context/$CONTEXT_USER"
+
+# Init git repo on first push
+if [ ! -d "$CONTEXT_DIR/.git" ]; then
+  git -C "$CONTEXT_DIR" init -b "$BRANCH"
+  git -C "$CONTEXT_DIR" remote add origin "$CONTEXT_REPO"
+fi
+
+# Commit and push only if there are changes
+git -C "$CONTEXT_DIR" add -A
+if ! git -C "$CONTEXT_DIR" diff --cached --quiet; then
+  git -C "$CONTEXT_DIR" commit -m "context: [PROJECT_NAME] $(date +%Y-%m-%d)"
+  git -C "$CONTEXT_DIR" push origin "$BRANCH" --set-upstream
+  echo "Context pushed to $CONTEXT_REPO on branch $BRANCH"
+else
+  echo "No context changes to push"
+fi
+```
+
+IF IT DOES NOT EXIST:
+- Skip silently — personal project or not yet configured
+
+**Step 6 — Confirm**
 
 Print: "Context updated. See you next session. 👋"
 WRAPEOF
@@ -273,7 +307,24 @@ Templates are in ~/.claude/skills/dev-context/templates/.
 4. Ask: "I think [pattern] could become a skill. Worth noting? (yes / no / later)"
    - yes/later → append to ~/dev-context/[PROJECT_NAME]/skill-candidates.md
 
-5. Print: "Context updated. See you next session. 👋"
+5. Check if `.dev-context` exists at the repo root.
+   IF IT EXISTS: read CONTEXT_REPO and CONTEXT_USER, then run:
+   ```bash
+   CONTEXT_DIR="$HOME/dev-context/[PROJECT_NAME]"
+   BRANCH="context/$CONTEXT_USER"
+   if [ ! -d "$CONTEXT_DIR/.git" ]; then
+     git -C "$CONTEXT_DIR" init -b "$BRANCH"
+     git -C "$CONTEXT_DIR" remote add origin "$CONTEXT_REPO"
+   fi
+   git -C "$CONTEXT_DIR" add -A
+   if ! git -C "$CONTEXT_DIR" diff --cached --quiet; then
+     git -C "$CONTEXT_DIR" commit -m "context: [PROJECT_NAME] $(date +%Y-%m-%d)"
+     git -C "$CONTEXT_DIR" push origin "$BRANCH" --set-upstream
+   fi
+   ```
+   IF IT DOES NOT EXIST: skip silently.
+
+6. Print: "Context updated. See you next session. 👋"
 
 **General rules:**
 - Never mention reading context files out loud — summarize in one line
@@ -300,6 +351,7 @@ echo "  ${TEMPLATES_DIR}/CONTEXT.md.template"
 echo "  ${TEMPLATES_DIR}/CURRENT.md.template"
 echo "  ${TEMPLATES_DIR}/CLAUDE.local.md.template"
 echo "  ${TEMPLATES_DIR}/GEMINI.md.template"
+echo "  ${TEMPLATES_DIR}/dev-context.template"
 echo "  ${TEMPLATES_DIR}/decisions/TEMPLATE.md"
 echo ""
 echo "Tip: inspect the script before running via curl: curl -fsSL ${BASE_URL}/install.sh | less"
