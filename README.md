@@ -181,13 +181,52 @@ Rough skill: given a ticket number, scaffold migration + test stubs in one shot.
 
 ---
 
-## Roadmap
+## What's next
 
-- [ ] Two-layer system — shared `docs-context/` folder in repo read alongside personal context
-- [ ] `/wrap-up` promotion flow — offer to stage personal discoveries for team review
-- [ ] Weekly distill command — AI reads recent merged PRs + personal context files,
-      proposes a shared update PR against the testing branch
-- [ ] Team install guide — onboard a whole repo with one command
+### Team knowledge consolidation (planned)
+
+The goal: every developer's session notes feed a shared knowledge base automatically,
+so the team accumulates institutional memory without any manual overhead.
+
+**Architecture**
+
+Each developer gets a personal branch in a **dedicated private repo**
+(separate from the codebase to keep things clean):
+
+```
+private context repo:
+  context/mike        ← Mike's ~/dev-context/[project]/ files, auto-pushed
+  context/sarah       ← Sarah's ~/dev-context/[project]/ files, auto-pushed
+  docs-context/       ← branch with consolidated shared knowledge
+```
+
+**Full flow**
+
+```
+Each session:
+  /wrap-up
+    → updates ~/dev-context/[project]/ as today
+    → auto-commits + pushes to context/[username] branch        ← to build
+
+Weekly or on demand (/distill):
+    → reads all context/* branches from the private repo
+    → consolidates into shared knowledge (manually for now, GitHub Action later)
+    → opens PR against testing branch:
+        docs-context/CONTEXT.md    ← promoted domain rules, gotchas
+        docs-context/decisions/    ← promoted decision logs
+
+Team:
+    → reviews PR like any other code change
+    → merges → every dev picks up shared context next session automatically
+```
+
+**What needs to be built**
+
+- [ ] `wrap-up.md` — add auto-push step: commit and push personal context to `context/[username]` after wrap-up
+- [ ] `install.sh` — set up the private context repo remote + create personal branch on first install
+- [ ] `/distill` skill — reads all `context/*` branches, proposes `docs-context/` additions (manual review before PR)
+- [ ] GitHub Action — automates the distill step on a schedule (e.g. Monday 9am) or on `workflow_dispatch`
+- [ ] Two-layer session start — also read `docs-context/CONTEXT.md` from repo if present
 
 ## To update
 
