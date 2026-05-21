@@ -2,7 +2,7 @@
 set -euo pipefail
 
 GITHUB_USER="mikehins-fliip"
-BASE_URL="https://raw.githubusercontent.com/${GITHUB_USER}/dev-context-skill/main"
+BASE_URL="${BASE_URL:-https://raw.githubusercontent.com/${GITHUB_USER}/dev-context-skill/main}"
 
 SKILL_DIR="${HOME}/.claude/skills/dev-context"
 TEMPLATES_DIR="${SKILL_DIR}/templates"
@@ -18,7 +18,12 @@ else
   LOCAL_MODE=false
 fi
 
-echo "Installing dev-context skill..."
+if [[ -d "${SKILL_DIR}" ]]; then
+  INSTALL_MODE="Updating"
+else
+  INSTALL_MODE="Installing"
+fi
+echo "${INSTALL_MODE} dev-context skill..."
 
 mkdir -p "${TEMPLATES_DIR}/decisions"
 
@@ -46,7 +51,8 @@ Templates for all files are in ~/.claude/skills/dev-context/templates/.
 ## Session Start — always do this first
 
 1. Detect PROJECT_NAME from the current repo folder name
-   (e.g. working in ~/code/flipapp → PROJECT_NAME is "flipapp")
+   (e.g. working in ~/code/myapp → PROJECT_NAME is "myapp")
+   If the folder name is generic (src, app, code, project, repo) or ambiguous, ask the user to confirm.
 
 2. Check if ~/dev-context/[PROJECT_NAME]/ exists.
 
@@ -64,15 +70,17 @@ Templates for all files are in ~/.claude/skills/dev-context/templates/.
 
 3. Check if CLAUDE.local.md exists at the repo root.
    IF IT DOES NOT EXIST:
-   - Create it from ~/.claude/skills/dev-context/templates/CLAUDE.local.md.template
-   - Replace all occurrences of [PROJECT_NAME] with the actual project name
+   - Ask: "No CLAUDE.local.md found here. Create one? (yes / skip)"
+   - yes → create from ~/.claude/skills/dev-context/templates/CLAUDE.local.md.template,
+            replacing [PROJECT_NAME] with the actual project name
+   - skip → do nothing
 
 ---
 
 ## Session End
 
-See ~/.claude/skills/dev-context/wrap-up.md for full wrap-up instructions.
 Triggered by: "wrap up", "/wrap-up", or "update context".
+Read ~/.claude/skills/dev-context/wrap-up.md in full and execute every step.
 
 ---
 
@@ -90,7 +98,9 @@ cat > "${SKILL_DIR}/wrap-up.md" << 'WRAPEOF'
 
 Triggered by: "wrap up", "/wrap-up", or "update context"
 
-Detect PROJECT_NAME from the current repo folder name before starting.
+Use PROJECT_NAME from the current session if already set by dev-context.
+If running standalone, detect from the current repo folder name.
+If the folder name is generic (src, app, code, project, repo), ask the user to confirm.
 
 ---
 
@@ -99,6 +109,7 @@ Detect PROJECT_NAME from the current repo folder name before starting.
 Overwrite ~/dev-context/[PROJECT_NAME]/CURRENT.md with a fresh summary of this session.
 Use the template at ~/.claude/skills/dev-context/templates/CURRENT.md.template.
 Fill every section based on what actually happened. Do not leave placeholders.
+Replace [DATE] with today's date in YYYY-MM-DD format.
 
 **Step 2 — Check for domain discoveries**
 
@@ -161,7 +172,13 @@ WRAPEOF
 
 # Symlink wrap-up skill → dev-context/wrap-up.md (single source of truth)
 mkdir -p "${HOME}/.claude/skills/wrap-up"
+if [[ -L "${HOME}/.claude/skills/wrap-up/SKILL.md" ]]; then
+  SYMLINK_STATUS="updated"
+else
+  SYMLINK_STATUS="created"
+fi
 ln -sf "${SKILL_DIR}/wrap-up.md" "${HOME}/.claude/skills/wrap-up/SKILL.md"
+echo "Symlink ${SYMLINK_STATUS}: ~/.claude/skills/wrap-up/SKILL.md → wrap-up.md"
 
 # Append dev-context block to ~/.claude/CLAUDE.md (idempotent)
 if grep -q "dev-context/SKILL.md" "${CLAUDE_MD}" 2>/dev/null; then
